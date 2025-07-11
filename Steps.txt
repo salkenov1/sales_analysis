@@ -1,0 +1,17 @@
+1. Run a ClickHouse database on Docker
+
+2. Load data into the database with a Python script
+    2.1. Parsed a nested .jsonl file
+    2.2. Flattened each order into rows (one per item)
+    2.3. Converted types (e.g., dates, numbers)
+    2.4 Inserted rows into orders.raw_data.
+
+3. Create a star schema using dbt
+    3.1. Built dimension tables: dim_users, dim_items, dim_orders, dim_payments, dim_dates
+    3.2. Created the fact table: fct_orders
+    3.3. Created marts: obt_order_items, obt_user_daily, obt_sales_daily, obt_category_sales, obt_payments_daily
+
+4. Visualize in Superset
+    4.1. Connected Superset to ClickHouse
+    4.2. Built charts: revenue over time, avg payment by method, total sales
+    4.3. Added filters and formatted metrics for dashboards

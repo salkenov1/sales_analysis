@@ -1,0 +1,202 @@
+version: 2
+
+models:
+  - name: dim_users
+    description: User dimension table
+    columns:
+      - name: user_id
+        description: Unique user identifier
+        tests:
+          - unique
+          - not_null
+      - name: user_name
+        description: Full name of the user
+      - name: user_email
+        description: Email address of the user
+      - name: user_country
+        description: Country of the user
+  - name: dim_orders
+    description: Order dimension table
+    columns:
+      - name: order_id
+        description: Unique identifier for the order
+        tests:
+          - unique
+          - not_null
+      - name: user_id
+        description: ID of the user who placed the order
+      - name: order_date
+        description: Timestamp when the order was placed
+      - name: payment_id
+        description: Payment ID associated with the order
+  - name: dim_items
+    description: Dimension table for the items
+    columns:
+      - name: item_id
+        description: Unique identifier of the item
+        tests:
+          - unique
+          - not null
+      - name: item_name
+        description: Name of the item
+      - name: item_category
+        description: Category of the item
+  - name: dim_payments
+    description: Dimension table for the payments
+    columns:
+      - name: payment_id
+        description: Unique identifier of the payment
+        tests:
+          - unique
+          - not null
+      - name: payment_method
+        description: Method used
+      - name: payment_status
+        description: Status of the payment
+      - name: payment_currency
+        description: Currency used in the transaction
+  - name: dim_dates
+    description: Oder dates dimensional table
+    columns:
+      - name: date
+        description: Calendar date
+      - name: year
+      - name: month
+      - name: day
+      - name: weekday
+      - name: year_month
+      - name: weekday_name
+      - name: is_weekday
+  - name: fct_orders
+    description: Fact table capturing each item sold in an order, including user, item, payment, and date dimensions. One row per order-item combination.
+    columns:
+      - name: order_id
+        description: Foreign key to dim_orders
+        tests:
+          - not_null
+      - name: order_day
+        description: Date part of the order timestamp (from dim_dates)
+      - name: user_id
+        description: Foreign key to dim_users
+        tests:
+          - not_null
+      - name: item_id
+        description: Foreign key to dim_items
+        tests:
+          - not_null
+      - name: item_quantity
+        description: Number of items ordered
+      - name: item_price
+        description: Price per unit of item
+      - name: total_price
+        description: item_quantity * item_price
+      - name: payment_id
+        description: Foreign key to dim_payments
+      - name: payment_amount
+        description: Actual amount paid for this item line
+  - name: obt_order_items
+    description: One Big Table combining facts and dimensions for each item sold in an order. Includes order, user, item, payment, and date-level context.
+    columns:
+      - name: order_id
+        description: Order ID from the original sale
+        tests:
+          - not_null
+      - name: order_date
+        description: Date extracted from order_date
+      - name: user_id
+        description: ID of the user who placed the order
+        tests:
+          - not_null
+      - name: user_country
+        description: Country of the user
+      - name: item_id
+        description: ID of the item sold
+        tests:
+          - not_null
+      - name: item_name
+        description: Name of the item sold
+      - name: item_category
+        description: Category of the item
+      - name: item_quantity
+        description: Quantity of the item sold
+      - name: item_price
+        description: Price per item
+      - name: total_price
+        description: item_quantity * item_price
+      - name: payment_id
+        description: ID of the payment
+        tests:
+          - not_null
+      - name: payment_method
+        description: Method used to pay
+      - name: payment_status
+        description: Payment status
+      - name: payment_currency
+        description: Currency used in the transaction
+      - name: payment_amount
+        description: Amount paid in that currency
+  - name: obt_category_sales
+    description: One big table summarizing daily sales performance per item category. Useful for category dashboards and trend tracking.
+    columns:
+      - name: order_date
+        description: Date of the order
+        tests:
+          - not_null
+      - name: item_category
+        description: Category of the item sold
+        tests:
+          - not_null
+      - name: orders_count
+        description: Number of distinct orders that included this category on the given day
+      - name: items_sold
+        description: Total number of items sold in this category
+      - name: revenue
+        description: Total revenue from items in this category
+      - name: avg_price
+        description: Average unit price of items sold in this category
+      - name: avg_items_per_order
+        description: Average number of items per order for this category
+  - name: obt_user_daily
+    description: One big table capturing daily user activity including orders, items purchased, and spendings.
+    columns:
+      - name: user_id
+        description: Unique identifier of the user
+        tests:
+          - not_null
+      - name: user_country
+        description: Country of the user
+      - name: order_date
+        description: Date of the activity
+        tests:
+          - not_null
+      - name: orders_count
+        description: Number of orders placed that day
+      - name: total_items
+        description: Total number of items in those orders
+      - name: unique_items
+        description: Number of distinct items purchased
+      - name: items_purchased
+        description: Total quantity of items purchased
+      - name: total_spent
+        description: Total amount spent that day
+      - name: avg_order_value
+        description: Average value of the user's orders that day
+  - name: obt_sales_daily
+    description: One big table summarizing daily sales and revenue performance.
+    columns:
+      - name: order_date
+        description: Date of the sales
+        tests:
+          - not_null
+      - name: total_orders
+        description: Number of distinct orders on that day
+      - name: unique_users
+        description: Number of unique users who placed orders
+      - name: items_sold
+        description: Total number of items sold
+      - name: total_revenue
+        description: Total sales revenue
+      - name: avg_order_value
+        description: Average order value across all orders
+      - name: avg_items_per_order
+        description: Average number of items per order

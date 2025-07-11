@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: orders
+    database: orders
+    schema: orders
+    tables:
+      - name: raw_data
